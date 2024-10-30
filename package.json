@@ -1,26 +1,27 @@
 {
   "name": "bujo.js",
   "version": "1.0.0",
-  "description": "A comprehensive bullet journal library",
-  "main": "src/BulletJournal.js",
+  "description": "A comprehensive bullet journal PDF generator",
+  "main": "src/bujo.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint src/ tests/"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/bujo.js.git"
+    "url": "https://github.com/inkshare/bujo.js.git"
   },
   "keywords": ["bullet journal", "pdf export", "javascript library", "planner"],
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "jspdf": "^2.4.0",
-    "fullcalendar": "^5.10.0",
-    "chart.js": "^2.9.4",
-    "quill": "^1.3.7",
-    "interactjs": "^1.10.11"
+    "jspdf": "^2.4.0"
   },
   "devDependencies": {
-    "jest": "^27.0.6"
+    "jest": "^27.0.6",
+    "eslint": "^9.13.0"
+  },
+  "engines": {
+    "node": ">=18.18.0"
   }
 }

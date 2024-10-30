@@ -1,8 +1,4 @@
 import jsPDF from 'jspdf';
-import FullCalendar from 'fullcalendar';
-import Chart from 'chart.js';
-import Quill from 'quill';
-import interact from 'interactjs';
 import { applyColorScheme } from './utils/colorScheme';
 
 const PAPER_SIZES = {
@@ -15,124 +11,105 @@ const PAPER_SIZES = {
 class BulletJournal {
     constructor(title = 'My Bullet Journal') {
         this.title = title;
-        this.pages = [];
-        this.calendar = null;
-        this.quillEditor = null;
     }
 
-    initCalendar(targetElement) {
-        this.calendar = new FullCalendar.Calendar(targetElement, { initialView: 'dayGridMonth', editable: true });
-        this.calendar.render();
-    }
-
-    initTextEditor(targetElement) {
-        this.quillEditor = new Quill(targetElement, { theme: 'snow', modules: { toolbar: [['bold', 'italic'], [{ 'list': 'bullet' }], ['link']] } });
-    }
-
-    addHabitTracker(targetElement, labels, data) {
-        const ctx = targetElement.getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: { labels: labels, datasets: [{ label: 'Habit Tracker', data: data, backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)' }] },
-            options: { scales: { y: { beginAtZero: true } } }
-        });
-    }
-
-    makeDraggable(targetElement) {
-        interact(targetElement).draggable({
-            inertia: true,
-            modifiers: [interact.modifiers.restrictRect({ restriction: 'parent' })],
-            listeners: {
-                move(event) {
-                    const { target } = event;
-                    const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                    const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                    target.style.transform = `translate(${x}px, ${y}px)`;
-                    target.setAttribute('data-x', x);
-                    target.setAttribute('data-y', y);
-                },
-            },
-        });
-    }
-
-    // Method to add illustration page based on the color scheme
-    addIllustrationPage(doc, moduleName, colorScheme) {
-        const imagePath = `../public/assets/module-images/${moduleName}-${colorScheme}.png`;
-
-        // Add new page and insert illustration image
+    // Generate a single dotted grid page
+    addDottedGridPage(doc, dotSpacing = 0.2, paperDimensions) {
+        for (let x = dotSpacing; x < paperDimensions.width; x += dotSpacing) {
+            for (let y = dotSpacing; y < paperDimensions.height; y += dotSpacing) {
+                doc.circle(x, y, 0.01, 'F');
+            }
+        }
         doc.addPage();
-        doc.text(`Module: ${moduleName}`, 105, 20, null, null, 'center'); // Module title
-        doc.addImage(imagePath, 'PNG', 20, 30, 170, 120); // Adjust dimensions as needed
     }
 
-    // Add a page for each module with a fresh page illustration
-    addPage(pageType, content = '', colorScheme = 'color') {
-        let pageContent = '';
-        const moduleName = pageType; // Use pageType as module name for image naming consistency
+    // Generate a single daily planning page
+    addDailyPlanningPage(doc, paperDimensions) {
+        doc.setFontSize(16);
+        doc.text("Daily Planner", paperDimensions.width * 12.7, 20, null, null, 'center');
+        doc.setFontSize(12);
+        doc.text("Morning", 10, 40);
+        doc.text("Afternoon", 10, 80);
+        doc.text("Evening", 10, 120);
+        doc.text("To-Do List", 10, 150);
 
-        // Add illustration page
-        this.addIllustrationPage(doc, moduleName, colorScheme);
-
-        // Add content page for the module
-        switch (pageType) {
-            case 'habitTracker':
-                pageContent = `<h2>Habit Tracker</h2><canvas id="habitTrackerCanvas"></canvas>`;
-                break;
-            case 'dailyPlanner':
-                pageContent = `<h2>Daily Planner</h2><div class="daily-planner">${content}</div>`;
-                break;
-            case 'monthlyPlanner':
-                pageContent = `<h2>Monthly Planner</h2><div class="monthly-planner">${content}</div>`;
-                break;
-            case 'textEditor':
-                pageContent = `<h2>Notes Section</h2><div id="editor"></div>`;
-                break;
-            case 'calendar':
-                pageContent = `<h2>Monthly Calendar</h2><div id="calendar"></div>`;
-                break;
-            default:
-                console.error('Unknown page type');
-                return;
+        for (let i = 0; i < 10; i++) {
+            doc.circle(15, 155 + i * 10, 2);
         }
 
-        this.pages.push({ type: pageType, content: pageContent });
+        doc.text("Priority Tasks", 10, 200);
+        for (let i = 0; i < 3; i++) {
+            doc.circle(15, 205 + i * 10, 2);
+        }
+
+        doc.text("Notes", 10, 240);
+        doc.line(10, 245, 190, 245);
+
+        doc.addPage();
     }
 
-    exportToHTML() {
-        const htmlContent = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <title>${this.title}</title>
-        </head>
-        <body>
-          <h1>${this.title}</h1>
-          ${this.pages.map(page => `<div class="bojo-page ${page.type}">${page.content}</div>`).join('\n')}
-        </body>
-        </html>`;
-      
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `${this.title.replace(' ', '_').toLowerCase()}.html`;
-        link.click();
-    }
-    
-    exportToPDF(colorScheme = 'color', paperSize = 'A5') {
-        const paperDimensions = PAPER_SIZES[paperSize] || PAPER_SIZES.A5; // Default to A5 if not provided
-        const doc = new jsPDF('p', 'in', [paperDimensions.width, paperDimensions.height]);
-        const colors = applyColorScheme(doc, colorScheme);
-        
+    // Generate a single weekly overview page
+    addWeeklyOverviewPage(doc, paperDimensions) {
         doc.setFontSize(16);
-        doc.setTextColor(colors.textColor);
-        
-        this.pages.forEach(page => {
-            doc.text(page.type, 10, 10);
-            doc.text(page.content.replace(/<[^>]+>/g, ''), 10, 20);
-            doc.addPage();
-        });
-        
-        doc.save(`${this.title.replace(/\s+/g, '_').toLowerCase()}_journal.pdf`);
+        doc.text("Weekly Overview", paperDimensions.width * 12.7, 20, null, null, 'center');
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        doc.setFontSize(12);
+
+        for (let i = 0; i < days.length; i++) {
+            doc.text(days[i], 10 + (i % 4) * 50, 40 + Math.floor(i / 4) * 40);
+            doc.line(10 + (i % 4) * 50, 45 + Math.floor(i / 4) * 40, 60 + (i % 4) * 50, 45 + Math.floor(i / 4) * 40);
+        }
+
+        doc.text("Goals", 10, 140);
+        for (let i = 0; i < 5; i++) {
+            doc.circle(15, 145 + i * 10, 2);
+        }
+
+        doc.text("Notes / Reflection", 10, 200);
+        doc.line(10, 205, 190, 205);
+
+        doc.addPage();
+    }
+
+    // Generate a single flexible tracking page
+    addFlexibleTrackingPage(doc, paperDimensions) {
+        doc.setFontSize(16);
+        doc.text("Flexible Tracking", paperDimensions.width * 12.7, 20, null, null, 'center');
+        doc.setFontSize(12);
+        doc.text("Habit Tracker", 10, 40);
+        const days = ["S", "M", "T", "W", "T", "F", "S"];
+
+        for (let i = 0; i < days.length; i++) {
+            doc.text(days[i], 30 + i * 20, 45);
+            for (let j = 0; j < 5; j++) {
+                doc.circle(30 + i * 20, 50 + j * 10, 2);
+            }
+        }
+
+        doc.text("Goal-Setting", 10, 100);
+        for (let i = 0; i < 5; i++) {
+            doc.circle(15, 105 + i * 10, 2);
+        }
+
+        doc.text("Flexible Tracking Space", 10, 150);
+        doc.line(10, 155, 190, 155);
+
+        doc.addPage();
+    }
+
+    // Main method to generate the complete bullet journal book
+    createBulletJournalBook(paperSize = 'A4') {
+        const paperDimensions = PAPER_SIZES[paperSize] || PAPER_SIZES.A4;
+        const doc = new jsPDF('p', 'in', [paperDimensions.width, paperDimensions.height]);
+
+        // Add each section to the PDF book
+        this.addDottedGridPage(doc, 0.2, paperDimensions);   // Dotted Grid
+        this.addDailyPlanningPage(doc, paperDimensions);      // Daily Planning
+        this.addWeeklyOverviewPage(doc, paperDimensions);     // Weekly Overview
+        this.addFlexibleTrackingPage(doc, paperDimensions);   // Flexible Tracking
+
+        // Save the combined PDF book
+        doc.save(`${this.title.replace(/\s+/g, '_').toLowerCase()}_journal_book.pdf`);
     }
 }
 
