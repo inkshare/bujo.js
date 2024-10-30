@@ -13,18 +13,44 @@ class BulletJournal {
         this.title = title;
     }
 
-    // Generate a single dotted grid page
-    addDottedGridPage(doc, dotSpacing = 0.2, paperDimensions) {
-        for (let x = dotSpacing; x < paperDimensions.width; x += dotSpacing) {
-            for (let y = dotSpacing; y < paperDimensions.height; y += dotSpacing) {
-                doc.circle(x, y, 0.01, 'F');
+    // Method to add an illustration page for each module
+    addIllustrationPage(doc, moduleName) {
+        if (!doc) throw new Error('Invalid document instance');
+        const imagePath = `/public/assets/module-images/${moduleName}.png`;
+
+        doc.addPage();
+        doc.setFontSize(18);
+        doc.text(`Module: ${moduleName}`, doc.internal.pageSize.width / 2, 30, null, null, 'center');
+        doc.addImage(imagePath, 'PNG', 20, 40, 170, 120);
+        doc.addPage();
+    }
+
+    addDottedGridPage(doc, dotSpacing, paperDimensions) {
+        if (!doc) throw new Error('Invalid document instance');
+        if (dotSpacing <= 0) throw new Error('Invalid dot spacing');
+        if (!paperDimensions) throw new Error('Invalid paper dimensions');
+    
+        doc.addPage();
+    
+        // Ensure at least one dot is added
+        const xLimit = Math.max(dotSpacing, paperDimensions.width);
+        const yLimit = Math.max(dotSpacing, paperDimensions.height);
+    
+        let dotAdded = false;
+        for (let x = dotSpacing; x <= xLimit && !dotAdded; x += dotSpacing) {
+            for (let y = dotSpacing; y <= yLimit && !dotAdded; y += dotSpacing) {
+                doc.circle(x, y, 0.01, 'F'); // Small dot with radius 0.01 inches
+                dotAdded = true; // Set flag to add only one dot if spacing is large
             }
         }
         doc.addPage();
     }
 
-    // Generate a single daily planning page
     addDailyPlanningPage(doc, paperDimensions) {
+        if (!doc) throw new Error('Invalid document instance');
+        if (!paperDimensions) throw new Error('Invalid paper dimensions');
+
+        this.addIllustrationPage(doc, 'dailyPlanner');
         doc.setFontSize(16);
         doc.text("Daily Planner", paperDimensions.width * 12.7, 20, null, null, 'center');
         doc.setFontSize(12);
@@ -44,12 +70,14 @@ class BulletJournal {
 
         doc.text("Notes", 10, 240);
         doc.line(10, 245, 190, 245);
-
         doc.addPage();
     }
 
-    // Generate a single weekly overview page
     addWeeklyOverviewPage(doc, paperDimensions) {
+        if (!doc) throw new Error('Invalid document instance');
+        if (!paperDimensions) throw new Error('Invalid paper dimensions');
+
+        this.addIllustrationPage(doc, 'weeklyOverview');
         doc.setFontSize(16);
         doc.text("Weekly Overview", paperDimensions.width * 12.7, 20, null, null, 'center');
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -67,12 +95,14 @@ class BulletJournal {
 
         doc.text("Notes / Reflection", 10, 200);
         doc.line(10, 205, 190, 205);
-
         doc.addPage();
     }
 
-    // Generate a single flexible tracking page
     addFlexibleTrackingPage(doc, paperDimensions) {
+        if (!doc) throw new Error('Invalid document instance');
+        if (!paperDimensions) throw new Error('Invalid paper dimensions');
+
+        this.addIllustrationPage(doc, 'flexibleTracking');
         doc.setFontSize(16);
         doc.text("Flexible Tracking", paperDimensions.width * 12.7, 20, null, null, 'center');
         doc.setFontSize(12);
@@ -93,24 +123,23 @@ class BulletJournal {
 
         doc.text("Flexible Tracking Space", 10, 150);
         doc.line(10, 155, 190, 155);
-
         doc.addPage();
     }
 
-    // Main method to generate the complete bullet journal book
-    createBulletJournalBook(paperSize = 'A4') {
-        const paperDimensions = PAPER_SIZES[paperSize] || PAPER_SIZES.A4;
-        const doc = new jsPDF('p', 'in', [paperDimensions.width, paperDimensions.height]);
-
-        // Add each section to the PDF book
-        this.addDottedGridPage(doc, 0.2, paperDimensions);   // Dotted Grid
-        this.addDailyPlanningPage(doc, paperDimensions);      // Daily Planning
-        this.addWeeklyOverviewPage(doc, paperDimensions);     // Weekly Overview
-        this.addFlexibleTrackingPage(doc, paperDimensions);   // Flexible Tracking
-
-        // Save the combined PDF book
-        doc.save(`${this.title.replace(/\s+/g, '_').toLowerCase()}_journal_book.pdf`);
+    createBulletJournalBook(paperSize, doc = new jsPDF()) {
+        const paperDimensions = PAPER_SIZES[paperSize];
+        if (!paperDimensions) throw new Error('Unsupported paper size');
+    
+        this.addDottedGridPage(doc, 0.2, paperDimensions);
+        this.addDailyPlanningPage(doc, paperDimensions);
+        this.addWeeklyOverviewPage(doc, paperDimensions);
+        this.addFlexibleTrackingPage(doc, paperDimensions);
+    
+        const filename = `${this.title.replace(/\s+/g, '_').toLowerCase()}_journal_book.pdf`;
+        // console.log('Saving file with name:', filename); // Log the filename for verification
+        doc.save(filename);
     }
+    
 }
 
 export { BulletJournal };
