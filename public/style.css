@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  
+  h1 {
+    color: #4A90E2;
+  }
+  
+  .calendar-container,
+  .habit-tracker,
+  .text-editor {
+    margin: 20px 0;
+    border: 1px solid #ddd;
+    padding: 10px;
+  }
+  
+  .calendar-container {
+    background-color: #f3e5f5;
+  }
+  
+  .habit-tracker {
+    background-color: #e3f2fd;
+  }
+  
+  .text-editor {
+    background-color: #fff3cd;
+  }
+  
