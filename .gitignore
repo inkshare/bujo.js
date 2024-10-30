@@ -28,7 +28,6 @@ out/
 Thumbs.db
 
 # IDE and editor config
-.vscode/
 .idea/
 *.sublime-workspace
 
