@@ -1,0 +1,18 @@
+name: Lock Old Issues
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"  # Runs weekly
+  workflow_dispatch:
+
+jobs:
+  lock-stale-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lock stale issues and pull requests
+        uses: dessant/lock-threads@v3
+        with:
+          issue-lock-inactive-days: 30
+          pr-lock-inactive-days: 30
+          skip-locked: true
+          lock-labels: 'locked'
