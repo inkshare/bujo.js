@@ -30,13 +30,31 @@ jobs:
 
       - name: Run tests with coverage
         run: npm test -- --coverage
-      
-      - name: Bump version and create release
-        if: github.ref == 'refs/heads/main'
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x  # Use a fixed Node version for releases
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure Git user
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          npm run release
-          git push --follow-tags origin main
+
+      - name: Run Semantic Release
+        run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
