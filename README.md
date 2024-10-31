@@ -4,82 +4,180 @@
 ![Node Version](https://img.shields.io/badge/node-%3E%3D18.18.0-green)
 [![Coverage Status](https://coveralls.io/repos/github/inkshare/bujo.js/badge.svg?branch=main)](https://coveralls.io/github/inkshare/bujo.js?branch=main)
 
-A comprehensive JavaScript library for generating customizable bullet journal PDFs, complete with templates for daily planning, weekly overviews, flexible tracking, and more. Ideal for those who want to create printable, organized bullet journals.
+`bujo.js` is a customizable library for generating Bullet Journal-style PDFs using JavaScript. It enables users to create organized PDF templates with customizable options, such as cover pages, milestones, undated calendars, planning pages, and more.
 
 ## Features
 
-- **Dotted Grid Pages**: Customizable grid spacing.
-- **Daily and Weekly Planning Pages**: Organize your day and week.
-- **Flexible Tracking Pages**: Track habits, goals, and reflections.
-- **Illustration Support**: Add unique illustration pages before each module.
-- **Multiple Paper Sizes**: Supports A3, A4, A5, and A6 formats.
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Usage](#usage)
-- [API](#api)
-- [Testing](#testing)
-- [Contributing](#contributing)
+- **Cover Page**: Add a personalized cover page to your journal.
+- **Index Page**: Add an index for easy navigation.
+- **Undated Calendar Pages**: Generate monthly calendar pages without specific dates.
+- **Top Milestones Pages**: Add up to 30 milestones and yearly top 10 milestones.
+- **Helicopter Overview**: Add a high-level overview page for the year.
+- **Dotted Grid Pages**: Include customizable numbers of dotted grid pages.
+- **Daily Planning Pages**: Add daily planning pages for detailed scheduling.
+- **Weekly Overview Pages**: Generate weekly pages to track activities for each day.
+- **Flexible Tracking Pages**: Add a flexible page for habit tracking, goal-setting, and reflections.
 
 ## Installation
 
-To install the dependencies, run:
-
-```bash
-npm install
-```
+1. Clone or download the `bujo.js` repository:
+   ```bash
+   git clone https://github.com/inkshare/bujo.js.git
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Import and use `bujo.js` in your project:
+   ```javascript
+   import { BulletJournal } from './src/bujo.js';
+   ```
 
 ## Usage
 
-Import the `BulletJournal` class and create a new bullet journal PDF with the provided methods.
+### Creating a New Bullet Journal
 
+To create a new instance of `BulletJournal`, specify the title and color scheme:
 ```javascript
-import { BulletJournal } from './src/bujo';
-
-const myJournal = new BulletJournal('My Custom Journal');
-myJournal.createBulletJournalBook('A4'); // Creates a complete journal PDF in A4 size
+const journal = new BulletJournal("My Custom Journal", "monochrome");
 ```
 
-### Available Templates
+### Customizing Your Bullet Journal
 
-- **Dotted Grid**: Customizable dot spacing
-- **Daily Planning**: Includes sections for morning, afternoon, evening, tasks, and notes
-- **Weekly Overview**: Shows each day of the week with goal and notes sections
-- **Flexible Tracking**: Track habits and set goals
+1. **Add Cover Page**:
+   ```javascript
+   journal.addCoverPage(doc);
+   ```
 
-## API
+2. **Add Index Page**:
+   ```javascript
+   journal.addIndexPage(doc);
+   ```
 
-### `new BulletJournal(title: string)`
+3. **Add Undated Calendar Pages**:
+   ```javascript
+   journal.addUndatedCalendarPages(doc);
+   ```
 
-Create a new bullet journal instance.
+4. **Add Top Milestones Pages**:
+   ```javascript
+   journal.addTopMilestonesPage(doc);
+   ```
 
-### `createBulletJournalBook(paperSize: string)`
+5. **Add Helicopter Overview Page**:
+   ```javascript
+   journal.addHelicopterOverviewPage(doc);
+   ```
 
-Generate a complete PDF book with the provided paper size (`A3`, `A4`, `A5`, `A6`).
+6. **Add Dotted Grid Pages**:
+   Specify the number of pages and dimensions:
+   ```javascript
+   const pageCount = 5;  // Number of dotted grid pages
+   for (let i = 0; i < pageCount; i++) {
+       journal.addDottedGridPage(doc, 0.2, { width: 8.27, height: 11.69 });
+   }
+   ```
 
-### Individual Templates
+7. **Add Daily Planning Page**:
+   ```javascript
+   journal.addDailyPlanningPage(doc, { width: 8.27, height: 11.69 });
+   ```
 
-Each method generates a specific PDF page:
-- `addDottedGridPage(doc, dotSpacing, paperDimensions)`
-- `addDailyPlanningPage(doc, paperDimensions)`
-- `addWeeklyOverviewPage(doc, paperDimensions)`
-- `addFlexibleTrackingPage(doc, paperDimensions)`
+8. **Add Weekly Overview Page**:
+   ```javascript
+   journal.addWeeklyOverviewPage(doc, { width: 8.27, height: 11.69 });
+   ```
+
+9. **Add Flexible Tracking Page**:
+   ```javascript
+   journal.addFlexibleTrackingPage(doc, { width: 8.27, height: 11.69 });
+   ```
+
+### Creating a Complete Bullet Journal Book
+
+To create a full Bullet Journal with a combination of the above sections:
+```javascript
+const doc = new jsPDF();
+journal.createBulletJournalBook('A4', doc);
+```
+
+This method will automatically add sections based on a standard format for the year, including cover, index, undated calendar, milestones, helicopter overview, and monthly planning pages.
+
+### Example Code for Form-driven Customization
+
+Here’s an example of how to use user input to customize the journal content:
+```javascript
+const topMilestones = true;  // User input
+const undatedCalendar = false;
+const indexPage = true;
+const coverPage = true;
+const helicopterOverview = false;
+const dottedGridCount = 5;
+const dailyPlanning = true;
+const flexibleTracking = true;
+
+const doc = new jsPDF();
+if (coverPage) journal.addCoverPage(doc);
+if (indexPage) journal.addIndexPage(doc);
+if (undatedCalendar) journal.addUndatedCalendarPages(doc);
+if (topMilestones) journal.addTopMilestonesPage(doc);
+if (helicopterOverview) journal.addHelicopterOverviewPage(doc);
+for (let i = 0; i < dottedGridCount; i++) {
+    journal.addDottedGridPage(doc, 0.2, { width: 8.27, height: 11.69 });
+}
+if (dailyPlanning) journal.addDailyPlanningPage(doc, { width: 8.27, height: 11.69 });
+if (flexibleTracking) journal.addFlexibleTrackingPage(doc, { width: 8.27, height: 11.69 });
+
+// Save the generated PDF
+doc.save("Custom_BulletJournal.pdf");
+```
+
+### Methods Summary
+
+| Method                   | Description                           |
+|--------------------------|---------------------------------------|
+| `addCoverPage(doc)`      | Adds a cover page                    |
+| `addIndexPage(doc)`      | Adds an index page                   |
+| `addUndatedCalendarPages(doc)` | Adds monthly calendar pages  |
+| `addTopMilestonesPage(doc)`     | Adds milestones page       |
+| `addHelicopterOverviewPage(doc)` | Adds helicopter overview  |
+| `addDottedGridPage(doc, spacing, dimensions)` | Adds dotted grid |
+| `addDailyPlanningPage(doc, dimensions)` | Adds daily planning |
+| `addWeeklyOverviewPage(doc, dimensions)` | Adds weekly overview |
+| `addFlexibleTrackingPage(doc, dimensions)` | Adds flexible tracking |
 
 ## Testing
 
-To run tests and check code coverage:
-
+To run tests and check for code coverage:
 ```bash
-npm test -- --coverage
+npm test
 ```
 
-### Negative Tests
+## Dependencies
 
-The test suite includes negative tests to validate error handling, such as:
-- Unsupported paper size
-- Missing document parameter
-- Negative dot spacing
+- [jsPDF](https://github.com/parallax/jsPDF) - For generating PDF documents.
+- Custom color schemes and design elements can be further customized by modifying `bujo.js`.
+
+## Versioning
+
+This project follows [Semantic Versioning (SemVer)](https://semver.org/). Using `standard-version`, version numbers are automatically updated based on the following types of commits:
+
+- **fix:** Patch release for bug fixes.
+- **feat:** Minor release for new features.
+- **BREAKING CHANGE:** Major release for backward-incompatible changes.
+
+### Commit Message Format
+
+To ensure versioning is correctly applied, use these commit message conventions:
+- `fix: <description>` – for bug fixes (patch).
+- `feat: <description>` – for new features (minor).
+- `feat!: <description>` – for breaking changes (major).
+
+For example:
+```bash
+git commit -m "feat: add helicopter overview page"
+git commit -m "fix: correct typo in milestone section"
+```
 
 ## Contributing
 
