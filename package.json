@@ -17,17 +17,24 @@
     "javascript library",
     "planner"
   ],
-  "author": "Your Name",
+  "author": "Inkshare",
   "license": "MIT",
   "dependencies": {
-    "jspdf": "^2.4.0"
+    "axios": "^1.7.7",
+    "jspdf": "^2.4.0",
+    "openai": "^4.68.4",
+    "dotenv": "^16.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
     "babel-jest": "^29.7.0",
     "eslint": "^9.13.0",
-    "jest": "^27.0.6"
+    "husky": "^9.1.6",
+    "jest": "^27.0.6",
+    "standard-version": "^9.5.0"
   },
   "engines": {
     "node": ">=18.18.0"
