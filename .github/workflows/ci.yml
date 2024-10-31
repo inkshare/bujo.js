@@ -13,13 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x]  # Set to Node.js 20.x for all steps
+        node-version: [20.x]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2  # Increase depth to ensure commit history is available for commitlint
+          fetch-depth: 0           # Ensure full history for semantic-release
+          persist-credentials: true # Allow semantic-release to push tags
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -45,12 +46,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch full history for semantic-release
+          fetch-depth: 0           # Ensure full history for tag push
+          persist-credentials: true # Allow semantic-release to push
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'  # Fixed to Node.js 20.x for semantic-release requirements
+          node-version: '20.x'
 
       - name: Install dependencies
         run: npm install
@@ -64,4 +66,3 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
